@@ -26,25 +26,19 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
-
-            sh '''
-                curl -X POST \
-                -H 'Content-type: application/json' \
-                --data '{"text":"Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}"}' \
-                'https://hooks.slack.com/services/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'
-            '''
+            slackSend(
+                channel: '#jenkins-ci-cd',
+                color: 'good',
+                message: "Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}"
+            )
         }
 
         failure {
-            echo 'Pipeline failed!'
-
-            sh '''
-                curl -X POST \
-                -H 'Content-type: application/json' \
-                --data '{"text":"Jenkins FAILED: ${JOB_NAME} #${BUILD_NUMBER}"}' \
-                'https://hooks.slack.com/services/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'
-            '''
+            slackSend(
+                channel: '#jenkins-ci-cd',
+                color: 'danger',
+                message: "Jenkins FAILED: ${JOB_NAME} #${BUILD_NUMBER}"
+            )
         }
     }
 }
