@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -11,7 +12,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t munjo-portfolio:${BUILD_NUMBER} .'
+                sh 'docker build -t munjo185/munjo-portfolio:${BUILD_NUMBER} .'
             }
         }
 
@@ -22,6 +23,23 @@ pipeline {
             }
         }
 
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push munjo185/munjo-portfolio:${BUILD_NUMBER}
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -29,7 +47,7 @@ pipeline {
             slackSend(
                 channel: '#jenkins-ci-cd',
                 color: 'good',
-                message: "Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}"
+                message: "Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER} - Docker image pushed to Docker Hub"
             )
         }
 
