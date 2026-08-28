@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: munjo-portfolio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: munjo-portfolio
+  template:
+    metadata:
+      labels:
+        app: munjo-portfolio
+    spec:
+      containers:
+        - name: munjo-portfolio
+          image: munjo185/munjo-portfolio:17
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
