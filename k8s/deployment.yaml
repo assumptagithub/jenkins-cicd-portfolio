@@ -3,7 +3,12 @@ kind: Deployment
 metadata:
   name: munjo-portfolio
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: munjo-portfolio
@@ -14,18 +19,46 @@ spec:
     spec:
       containers:
         - name: munjo-portfolio
-          image: munjo185/munjo-portfolio:17
+          image: munjo185/munjo-portfolio:18
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+
           env:
             - name: APP_ENV
               valueFrom:
                 configMapKeyRef:
                   name: munjo-portfolio-config
                   key: APP_ENV
+
             - name: SITE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: munjo-portfolio-secret
                   key: SITE_API_KEY
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
