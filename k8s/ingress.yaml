@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: munjo-portfolio
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: munjo-portfolio.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: munjo-portfolio
+                port:
+                  number: 80
