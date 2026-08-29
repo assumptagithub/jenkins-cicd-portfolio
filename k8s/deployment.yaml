@@ -18,3 +18,14 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: munjo-portfolio-config
+                  key: APP_ENV
+            - name: SITE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: munjo-portfolio-secret
+                  key: SITE_API_KEY
