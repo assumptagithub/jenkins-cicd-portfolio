@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -40,6 +39,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    export KUBECONFIG=/tmp/minikube-kubeconfig
+
+                    kubectl set image deployment/munjo-portfolio \
+                      munjo-portfolio=munjo185/munjo-portfolio:${BUILD_NUMBER}
+
+                    kubectl rollout status deployment/munjo-portfolio --timeout=120s
+                '''
+            }
+        }
     }
 
     post {
@@ -47,7 +59,7 @@ pipeline {
             slackSend(
                 channel: '#jenkins-ci-cd',
                 color: 'good',
-                message: "Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER} - Docker image pushed to Docker Hub"
+                message: "Jenkins SUCCESS: ${JOB_NAME} #${BUILD_NUMBER} - Docker image pushed and deployed to Kubernetes"
             )
         }
 
